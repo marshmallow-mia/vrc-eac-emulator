@@ -7,6 +7,10 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+# Limit GITHUB_TOKEN permissions to minimum required
+permissions:
+  contents: read
+
 jobs:
   build-mingw:
     name: Build with MinGW (Cross-compile for Wine)
