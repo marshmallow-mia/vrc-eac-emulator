@@ -1,6 +1,6 @@
 #pragma once
 
-#include <corecrt_malloc.h>
+#include <cstdlib>
 
 struct buffer {
     void* data;

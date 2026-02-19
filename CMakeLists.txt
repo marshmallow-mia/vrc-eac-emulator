@@ -5,7 +5,6 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(dependencies)
-link_libraries(minhook)
 include_directories(${plog_SOURCE_DIR}/include)
 
 file(GLOB_RECURSE includes_deps
@@ -19,5 +18,10 @@ file(GLOB_RECURSE includes_deps
 include_directories(includes)
 include_directories(src)
 
-add_subdirectory(src/win)
-add_subdirectory(src/linux)
+# Build platform-specific components based on the target platform
+if(WIN32)
+    link_libraries(minhook)
+    add_subdirectory(src/win)
+else()
+    add_subdirectory(src/linux)
+endif()

@@ -1,0 +1,89 @@
+name: Build
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    name: Build Linux Component (MinGW)
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake ninja-build mingw-w64
+    
+    - name: Configure CMake for MinGW cross-compilation
+      run: |
+        cat > mingw-toolchain.cmake << 'EOF'
+        set(CMAKE_SYSTEM_NAME Windows)
+        set(CMAKE_C_COMPILER x86_64-w64-mingw32-gcc)
+        set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++)
+        set(CMAKE_RC_COMPILER x86_64-w64-mingw32-windres)
+        set(CMAKE_FIND_ROOT_PATH /usr/x86_64-w64-mingw32)
+        set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+        set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+        set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+        EOF
+        cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=mingw-toolchain.cmake
+    
+    - name: Build
+      run: |
+        cmake --build build --config Release
+    
+    - name: List build artifacts
+      run: |
+        find build -name "*.dll" -o -name "*.so" || echo "No artifacts found"
+    
+    - name: Upload Linux artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: linux-build
+        path: |
+          build/src/linux/*.dll
+          build/src/linux/*.so
+        if-no-files-found: warn
+
+  build-windows:
+    name: Build Windows Component
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Setup CMake
+      uses: lukka/get-cmake@latest
+    
+    - name: Configure CMake
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=Release
+    
+    - name: Build
+      run: |
+        cmake --build build --config Release
+    
+    - name: List build artifacts
+      run: |
+        Get-ChildItem -Path build -Recurse -Include *.dll
+    
+    - name: Upload Windows artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-build
+        path: |
+          build/src/win/Release/*.dll
+          build/src/win/*.dll
+        if-no-files-found: warn
