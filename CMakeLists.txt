@@ -19,6 +19,9 @@ include_directories(includes)
 include_directories(src)
 
 # Build platform-specific components based on the target platform
+# Note: Both src/win and src/linux build Windows DLLs that require WIN32 APIs.
+# src/linux builds version.dll for use with Wine on Linux.
+# src/win builds EOSSDK-Win64-Shipping.dll for native Windows.
 if(WIN32)
     link_libraries(minhook)
     # Build both components on Windows
