@@ -7,9 +7,6 @@
 
 class exception_handler {
 	static LONG WINAPI TopLevelExceptionFilter(struct _EXCEPTION_POINTERS *ExceptionInfo) {
-		crashlog::initSym();
-		crashlog::loadSym();
-
 		auto info = crashlog::parseException(ExceptionInfo);
 		std::ostringstream stream;
 		stream << crashlog::exceptionInfoToString(info) << std::endl;
@@ -26,6 +23,9 @@ class exception_handler {
 
 public:
 	static void init() {
+		// Initialize symbols once at startup
+		crashlog::initSym();
+		crashlog::loadSym();
 		SetUnhandledExceptionFilter(&TopLevelExceptionFilter);
 	}
 };
