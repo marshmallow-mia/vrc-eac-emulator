@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-linux:
-    name: Build Linux Component (MinGW)
+  build-mingw:
+    name: Build with MinGW (Cross-compile for Wine)
     runs-on: ubuntu-latest
     
     steps:
@@ -43,19 +43,19 @@ jobs:
     
     - name: List build artifacts
       run: |
-        find build -name "*.dll" -o -name "*.so" || echo "No artifacts found"
+        find build -name "*.dll" || echo "No DLL files found"
     
-    - name: Upload Linux artifacts
+    - name: Upload MinGW build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: linux-build
+        name: mingw-build
         path: |
+          build/src/win/*.dll
           build/src/linux/*.dll
-          build/src/linux/*.so
         if-no-files-found: warn
 
   build-windows:
-    name: Build Windows Component
+    name: Build with MSVC (Native Windows)
     runs-on: windows-latest
     
     steps:
@@ -79,11 +79,13 @@ jobs:
       run: |
         Get-ChildItem -Path build -Recurse -Include *.dll
     
-    - name: Upload Windows artifacts
+    - name: Upload Windows build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: windows-build
         path: |
           build/src/win/Release/*.dll
+          build/src/linux/Release/*.dll
           build/src/win/*.dll
+          build/src/linux/*.dll
         if-no-files-found: warn

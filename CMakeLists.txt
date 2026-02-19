@@ -21,7 +21,7 @@ include_directories(src)
 # Build platform-specific components based on the target platform
 if(WIN32)
     link_libraries(minhook)
+    # Build both components on Windows
     add_subdirectory(src/win)
-else()
     add_subdirectory(src/linux)
 endif()
