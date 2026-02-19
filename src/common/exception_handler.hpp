@@ -12,7 +12,7 @@ class exception_handler {
 	static LONG WINAPI TopLevelExceptionFilter(struct _EXCEPTION_POINTERS *ExceptionInfo) {
 		auto info = crashlog::parse(ExceptionInfo);
 		std::ostringstream stream;
-		
+
 		stream << "========= Exception Info ==========" << std::endl;
 		crashlog::ExceptionMetadata metadata = info.exceptionMetadata;
 		stream << "Exception At: " << crashlog::addressToString(metadata.address) << std::endl;
@@ -25,13 +25,13 @@ class exception_handler {
 			}, value);
 			stream << "  " << key << ": " << valString << std::endl;
 		}
-		
+
 		stream << "========= Stack Trace ===========" << std::endl;
 		crashlog::StackTrace stackTrace = info.stacktrace;
 		for (const auto& frame : stackTrace) {
 			stream << crashlog::addressToString(frame) << std::endl;
 		}
-		
+
 		stream << "=========== Registers ================" << std::endl;
 		for (const auto& [regName, regValue] : info.registers) {
 			stream << regName << ": " << std::hex << regValue << std::endl;
