@@ -2,6 +2,7 @@
 
 #include <string>
 #include <utility>
+#include <cstdint>
 
 class nullable_string {
 	std::string str;

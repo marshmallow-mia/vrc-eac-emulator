@@ -1,0 +1,49 @@
+name: Build
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+# Limit GITHUB_TOKEN permissions to minimum required
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    name: Build with MSVC (Native Windows)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: |
+          cmake --build build --config Release
+
+      - name: List build artifacts
+        run: |
+          Get-ChildItem -Path build -Recurse -Include *.dll
+
+      - name: Upload Windows build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: |
+            build/src/win/Release/*.dll
+            build/src/linux/Release/*.dll
+            build/src/win/*.dll
+            build/src/linux/*.dll
+          if-no-files-found: warn
